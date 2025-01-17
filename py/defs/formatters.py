@@ -35,6 +35,24 @@ def calc_unet_hash(model_name, input_data):
     return calc_hash(filename)
 
 
+def get_model_name(model_name, input_data):
+    path = folder_paths.get_full_path("checkpoints", model_name)
+    filename = os.path.basename(path)
+    return filename
+
+
+def get_vae_name(model_name, input_data):
+    path = folder_paths.get_full_path("vae", model_name)
+    filename = os.path.basename(path)
+    return filename
+
+
+def get_unet_name(model_name, input_data):
+    path = folder_paths.get_full_path("unet", model_name)
+    filename = os.path.basename(path)
+    return filename
+
+
 def convert_skip_clip(stop_at_clip_layer, input_data):
     return stop_at_clip_layer * -1
 

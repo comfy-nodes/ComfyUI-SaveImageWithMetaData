@@ -5,6 +5,9 @@ from .formatters import (
     calc_vae_hash,
     calc_lora_hash,
     calc_unet_hash,
+    get_model_name,
+    get_vae_name,
+    get_unet_name,
     convert_skip_clip,
     get_scaled_width,
     get_scaled_height,
@@ -15,7 +18,7 @@ from .formatters import (
 
 CAPTURE_FIELD_LIST = {
     "CheckpointLoaderSimple": {
-        MetaField.MODEL_NAME: {"field_name": "ckpt_name"},
+        MetaField.MODEL_NAME: {"field_name": "ckpt_name", "format": get_model_name},
         MetaField.MODEL_HASH: {"field_name": "ckpt_name", "format": calc_model_hash},
     },
     "CLIPSetLastLayer": {
@@ -25,7 +28,7 @@ CAPTURE_FIELD_LIST = {
         },
     },
     "VAELoader": {
-        MetaField.VAE_NAME: {"field_name": "vae_name"},
+        MetaField.VAE_NAME: {"field_name": "vae_name", "format": get_vae_name},
         MetaField.VAE_HASH: {"field_name": "vae_name", "format": calc_vae_hash},
     },
     "EmptyLatentImage": {
@@ -95,7 +98,7 @@ CAPTURE_FIELD_LIST = {
     },
     # Flux - https://comfyanonymous.github.io/ComfyUI_examples/flux/
     "UNETLoader": {
-        MetaField.MODEL_NAME: {"field_name": "unet_name"},
+        MetaField.MODEL_NAME: {"field_name": "unet_name", "format": get_unet_name},
         MetaField.MODEL_HASH: {"field_name": "unet_name", "format": calc_unet_hash},
     },
     "RandomNoise": {
