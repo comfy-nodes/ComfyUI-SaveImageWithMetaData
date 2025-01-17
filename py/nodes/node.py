@@ -49,6 +49,7 @@ class SaveImageWithMetaData(BaseNode):
             "optional": {
                 "lossless_webp": ("BOOLEAN", {"default": True}),
                 "quality": ("INT", {"default": 100, "min": 1, "max": 100}),
+                "include_workflow_metadata": ("BOOLEAN", {"default": True}),
                 "save_workflow_json": ("BOOLEAN", {"default": False}),
                 "add_counter_to_filename": ("BOOLEAN", {"default": True}),
                 "civitai_sampler": ("BOOLEAN", {"default": False}),
@@ -73,6 +74,7 @@ class SaveImageWithMetaData(BaseNode):
         file_format="png",
         lossless_webp=True,
         quality=100,
+        include_workflow_metadata=True,
         save_workflow_json=False,
         add_counter_to_filename=True,
         civitai_sampler=False,
@@ -104,11 +106,12 @@ class SaveImageWithMetaData(BaseNode):
                 parameters = Capture.gen_parameters_str(pnginfo_dict)
                 if pnginfo_dict:
                     metadata.add_text("parameters", parameters)
-                if prompt is not None:
-                    metadata.add_text("prompt", json.dumps(prompt))
-                if extra_pnginfo is not None:
-                    for x in extra_pnginfo:
-                        metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+                if include_workflow_metadata == True:
+                    if prompt is not None:
+                        metadata.add_text("prompt", json.dumps(prompt))
+                    if extra_pnginfo is not None:
+                        for x in extra_pnginfo:
+                            metadata.add_text(x, json.dumps(extra_pnginfo[x]))
 
             filename_prefix = self.format_filename(filename_prefix, pnginfo_dict)
             output_path = os.path.join(self.output_dir, filename_prefix)
