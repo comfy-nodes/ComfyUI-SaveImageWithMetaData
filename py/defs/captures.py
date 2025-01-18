@@ -111,4 +111,7 @@ CAPTURE_FIELD_LIST = {
     "KSamplerSelect": {
         MetaField.SAMPLER_NAME: {"field_name": "sampler_name"},
     },
+    "FluxGuidance": {
+        MetaField.GUIDANCE: {"field_name": "guidance"},
+    }
 }
