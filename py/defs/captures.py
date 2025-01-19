@@ -53,6 +53,24 @@ CAPTURE_FIELD_LIST = {
             "format": extract_embedding_hashes,
         },
     },
+    "CLIPTextEncodeSDXL": {
+        MetaField.POSITIVE_PROMPT: {
+            "field_name": "text_g",
+            "validate": is_positive_prompt,
+        },
+        MetaField.NEGATIVE_PROMPT: {
+            "field_name": "text_g",
+            "validate": is_negative_prompt,
+        },
+        MetaField.EMBEDDING_NAME: {
+            "field_name": "text_g",
+            "format": extract_embedding_names,
+        },
+        MetaField.EMBEDDING_HASH: {
+            "field_name": "text_g",
+            "format": extract_embedding_hashes,
+        },
+    },
     "KSampler": {
         MetaField.SEED: {"field_name": "seed"},
         MetaField.STEPS: {"field_name": "steps"},
