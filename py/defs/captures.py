@@ -71,6 +71,20 @@ CAPTURE_FIELD_LIST = {
             "format": extract_embedding_hashes,
         },
     },
+    "CLIPTextEncodeFlux": {
+        MetaField.POSITIVE_PROMPT: {
+            "field_name": "t5xxl",
+            "validate": is_positive_prompt,
+        },
+        MetaField.EMBEDDING_NAME: {
+            "field_name": "t5xxl",
+            "format": extract_embedding_names,
+        },
+        MetaField.EMBEDDING_HASH: {
+            "field_name": "t5xxl",
+            "format": extract_embedding_hashes,
+        },
+    },
     "KSampler": {
         MetaField.SEED: {"field_name": "seed"},
         MetaField.STEPS: {"field_name": "steps"},

@@ -25,7 +25,8 @@ def _get_node_id_list(prompt, field_name):
                     class_type = prompt[nid2]["class_type"]
                     if class_type in [
                         "CLIPTextEncode",
-                        "CLIPTextEncodeSDXL"
+                        "CLIPTextEncodeSDXL",
+                        "CLIPTextEncodeFlux"
                     ]:
                         node_id_list[nid] = nid2
                         break
