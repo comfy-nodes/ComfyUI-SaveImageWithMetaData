@@ -145,5 +145,8 @@ CAPTURE_FIELD_LIST = {
     },
     "FluxGuidance": {
         MetaField.GUIDANCE: {"field_name": "guidance"},
-    }
+    },
+    "CFGGuider": {
+        MetaField.CFG: {"field_name": "cfg"},
+    },
 }
