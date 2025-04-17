@@ -54,6 +54,8 @@ class SaveImageWithMetaData(BaseNode):
                 "add_counter_to_filename": ("BOOLEAN", {"default": True}),
                 "civitai_sampler": ("BOOLEAN", {"default": False}),
                 "extra_metadata": ("EXTRA_METADATA", {}),
+                "positive_string": ("STRING", {"forceInput": True}),
+                "negative_string": ("STRING", {"forceInput": True}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -81,6 +83,8 @@ class SaveImageWithMetaData(BaseNode):
         extra_metadata={},
         prompt=None,
         extra_pnginfo=None,
+        positive_string=None,
+        negative_string=None,
     ):
         pnginfo_dict_src = self.gen_pnginfo(
             sampler_selection_method, sampler_selection_node_id, civitai_sampler
@@ -103,6 +107,10 @@ class SaveImageWithMetaData(BaseNode):
             parameters = ""
             if not args.disable_metadata:
                 metadata = PngInfo()
+                if positive_string not in (None, ""):
+                    pnginfo_dict["Positive prompt"] = positive_string.strip()
+                if negative_string not in (None, ""):
+                    pnginfo_dict["Negative prompt"] = negative_string.strip()
                 parameters = Capture.gen_parameters_str(pnginfo_dict)
                 if pnginfo_dict:
                     metadata.add_text("parameters", parameters)

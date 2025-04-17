@@ -115,7 +115,7 @@ class Capture:
         # Format: <lora:Lora_Model_Name:weight_value>
         # Example: <lora:Lora_Name_00:0.6> <lora:Lora_Name_01:0.8>
         if lora_strings:
-            positive_prompt += " " + " ".join(lora_strings)
+            pnginfo_dict["lora_strings"] = lora_strings
 
         pnginfo_dict["Positive prompt"] = positive_prompt.strip()
         update_pnginfo_dict(inputs_before_sampler_node, MetaField.NEGATIVE_PROMPT, "Negative prompt")
@@ -196,7 +196,14 @@ class Capture:
 
     @classmethod
     def gen_parameters_str(cls, pnginfo_dict):
-        result = pnginfo_dict.get("Positive prompt", "") + "\n"
+        result = pnginfo_dict.get("Positive prompt", "")
+
+        lora_strings = pnginfo_dict.get("lora_strings", "")
+        if lora_strings:
+            result += " " + " ".join(lora_strings)
+            del pnginfo_dict["lora_strings"]
+
+        result += "\n"
 
         negative_prompt = pnginfo_dict.get("Negative prompt", "")
         if negative_prompt:
