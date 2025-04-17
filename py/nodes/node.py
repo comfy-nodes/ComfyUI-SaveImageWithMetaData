@@ -264,16 +264,10 @@ class CreateExtraMetaData(BaseNode):
     def INPUT_TYPES(s):
         return {
             "required": {
-                "key1": ("STRING", {"default": "", "multiline": False}),
-                "value1": ("STRING", {"default": "", "multiline": False}),
+                "key": ("STRING", {"default": "", "multiline": False}),
+                "value": ("STRING", {"default": "", "multiline": False}),
             },
             "optional": {
-                "key2": ("STRING", {"default": "", "multiline": False}),
-                "value2": ("STRING", {"default": "", "multiline": False}),
-                "key3": ("STRING", {"default": "", "multiline": False}),
-                "value3": ("STRING", {"default": "", "multiline": False}),
-                "key4": ("STRING", {"default": "", "multiline": False}),
-                "value4": ("STRING", {"default": "", "multiline": False}),
                 "extra_metadata": ("EXTRA_METADATA",),
             },
         }
@@ -281,24 +275,15 @@ class CreateExtraMetaData(BaseNode):
     RETURN_TYPES = ("EXTRA_METADATA",)
     FUNCTION = "create_extra_metadata"
 
-    def create_extra_metadata(
-        self,
-        extra_metadata={},
-        key1="",
-        value1="",
-        key2="",
-        value2="",
-        key3="",
-        value3="",
-        key4="",
-        value4="",
-    ):
-        extra_metadata.update(
-            {
-                key1: value1,
-                key2: value2,
-                key3: value3,
-                key4: value4,
-            }
-        )
-        return (extra_metadata,)
+    def create_extra_metadata(self, key="", value="", extra_metadata=None):
+        new_metadata = {}
+
+        # If there is previous metadata, copy it
+        if isinstance(extra_metadata, dict):
+            new_metadata.update(extra_metadata)
+
+        # Adding a new value
+        if key:
+            new_metadata[key] = value
+
+        return (new_metadata,)
