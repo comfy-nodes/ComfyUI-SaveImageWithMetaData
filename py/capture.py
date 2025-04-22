@@ -133,8 +133,11 @@ class Capture:
 
                 if len(schedulers) > 0:
                     scheduler = schedulers[0][1]
-                    if scheduler != "normal":
-                        pnginfo_dict["Sampler"] += "_" + scheduler
+                else:
+                    scheduler = ""
+
+                if scheduler != "normal" and scheduler != "":
+                    pnginfo_dict["Sampler"] += "_" + scheduler
 
         update_pnginfo_dict(inputs_before_sampler_node, MetaField.CFG, "CFG scale")
         update_pnginfo_dict(inputs_before_sampler_node, MetaField.GUIDANCE, "Guidance")
@@ -287,6 +290,8 @@ class Capture:
             sampler = sampler_names[0][1]
         if len(schedulers) > 0:
             scheduler = schedulers[0][1]
+        else:
+            scheduler = ""
 
         match sampler:
             case "euler" | "euler_cfg_pp":
@@ -322,6 +327,6 @@ class Capture:
             case "uni_pc" | "uni_pc_bh2":
                 return "UniPC"
             
-        if scheduler == "normal":
+        if scheduler in ("normal", ""):
             return sampler
         return sampler + "_" + scheduler
