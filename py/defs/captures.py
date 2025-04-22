@@ -149,4 +149,10 @@ CAPTURE_FIELD_LIST = {
     "CFGGuider": {
         MetaField.CFG: {"field_name": "cfg"},
     },
+    "AlignYourStepsScheduler": {
+        MetaField.STEPS: {"field_name": "steps"},
+    },
+    "GITSScheduler": {
+        MetaField.STEPS: {"field_name": "steps"},
+    },
 }
