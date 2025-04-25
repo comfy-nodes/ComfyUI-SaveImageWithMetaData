@@ -4,12 +4,12 @@ from ..meta import MetaField
 
 
 def get_width(preset, input_data):
-    match = re.search(r"\b(\d+)\s*x\s*(\d+)\b", preset)
+    match = re.search(r"\b(\d+)\s*[x×]\s*(\d+)\b", preset)
     return int(match.group(1)) if match else None
 
 
 def get_height(preset, input_data):
-    match = re.search(r"\b(\d+)\s*x\s*(\d+)\b", preset)
+    match = re.search(r"\b(\d+)\s*[x×]\s*(\d+)\b", preset)
     return int(match.group(2)) if match else None
 
 
