@@ -85,7 +85,7 @@ def extract_embedding_hashes(text, input_data):
 
 def _extract_embedding_names(text, input_data):
     embedding_identifier = "embedding:"
-    clip_ = input_data[0]["clip"][0]
+    clip_ = input_data[0]["clip"][0] if input_data[0]["clip"] else None
     clip = None
     if clip_ is not None:
         tokenizer = clip_.tokenizer
@@ -115,6 +115,7 @@ def _extract_embedding_names(text, input_data):
             # find an embedding, deal with the embedding
             if (
                 word.startswith(embedding_identifier)
+                and clip is not None
                 and clip.embedding_directory is not None
             ):
                 embedding_name = word[len(embedding_identifier) :].strip("\n")
