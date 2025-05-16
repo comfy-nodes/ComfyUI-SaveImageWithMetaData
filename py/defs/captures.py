@@ -84,6 +84,7 @@ CAPTURE_FIELD_LIST = {
             "field_name": "t5xxl",
             "format": extract_embedding_hashes,
         },
+        MetaField.GUIDANCE: {"field_name": "guidance"},
     },
     "KSampler": {
         MetaField.SEED: {"field_name": "seed"},
