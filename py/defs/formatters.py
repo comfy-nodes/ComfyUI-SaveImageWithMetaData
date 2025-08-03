@@ -1,4 +1,5 @@
 import os
+import string
 
 import folder_paths
 
@@ -118,7 +119,7 @@ def _extract_embedding_names(text, input_data):
                 and clip is not None
                 and clip.embedding_directory is not None
             ):
-                embedding_name = word[len(embedding_identifier) :].strip("\n")
+                embedding_name = word[len(embedding_identifier) :].strip("\n").strip(string.punctuation)
                 embedding_names.append(embedding_name)
 
     return embedding_names, clip
