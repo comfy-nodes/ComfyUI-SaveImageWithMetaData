@@ -286,8 +286,10 @@ class Capture:
                 return sampler + " Karras"
             return sampler
 
-        if len(sampler_names) > 0:
-            sampler = sampler_names[0][1]
+        if len(sampler_names) == 0:
+            return ""
+
+        sampler = sampler_names[0][1]
         if len(schedulers) > 0:
             scheduler = schedulers[0][1]
         else:
