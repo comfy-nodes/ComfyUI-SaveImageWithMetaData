@@ -12,6 +12,7 @@ from comfy.text_encoders.sd2_clip import SD2Tokenizer
 from comfy.text_encoders.sd3_clip import SD3Tokenizer
 from comfy.text_encoders.flux import FluxTokenizer
 from comfy.sdxl_clip import SDXLTokenizer
+from comfy.text_encoders.qwen_image import QwenImageTokenizer
 
 cache_model_hash = {}
 
@@ -91,17 +92,28 @@ def _extract_embedding_names(text, input_data):
     if clip_ is not None:
         tokenizer = clip_.tokenizer
         if isinstance(tokenizer, SD1Tokenizer):
-            clip = tokenizer.clip_l
+            clip = getattr(tokenizer, "clip_l", None)
         elif isinstance(tokenizer, SD2Tokenizer):
-            clip = tokenizer.clip_h
+            clip = getattr(tokenizer, "clip_h", None)
         elif isinstance(tokenizer, SDXLTokenizer):
-            clip = tokenizer.clip_l
+            clip = getattr(tokenizer, "clip_l", None)
         elif isinstance(tokenizer, SD3Tokenizer):
-            clip = tokenizer.clip_l
+            clip = getattr(tokenizer, "clip_l", None)
         elif isinstance(tokenizer, FluxTokenizer):
-            clip = tokenizer.clip_l
+            clip = getattr(tokenizer, "clip_l", None)
+        elif isinstance(tokenizer, QwenImageTokenizer):
+            clip = getattr(tokenizer, "clip", None)
+
+        # Fallbacks for other tokenizers
+        if clip is None:
+            clip = getattr(tokenizer, "clip_l", None) or getattr(tokenizer, "clip_h", None) or getattr(tokenizer, "clip", None)
+
+        # Prefer embedding_identifier from clip if available;
+        # otherwise fall back to tokenizer if it exposes it
         if clip is not None and hasattr(clip, "embedding_identifier"):
             embedding_identifier = clip.embedding_identifier
+        elif hasattr(tokenizer, "embedding_identifier"):
+            embedding_identifier = tokenizer.embedding_identifier
     if not isinstance(text, str):
         text = "".join(str(item) if item is not None else "" for item in text)
     text = escape_important(text)
@@ -117,7 +129,7 @@ def _extract_embedding_names(text, input_data):
             if (
                 word.startswith(embedding_identifier)
                 and clip is not None
-                and clip.embedding_directory is not None
+                and getattr(clip, "embedding_directory", None) is not None
             ):
                 embedding_name = word[len(embedding_identifier) :].strip("\n").strip(string.punctuation)
                 embedding_names.append(embedding_name)
