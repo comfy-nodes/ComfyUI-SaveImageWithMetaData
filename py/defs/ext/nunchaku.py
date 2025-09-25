@@ -7,6 +7,9 @@ CAPTURE_FIELD_LIST = {
     "NunchakuFluxDiTLoader": {
         MetaField.MODEL_NAME: {"field_name": "model_path", "format": get_unet_name},
     },
+    "NunchakuQwenImageDiTLoader": {
+        MetaField.MODEL_NAME: {"field_name": "model_name", "format": get_unet_name},
+    },
     "NunchakuFluxLoraLoader": {
         MetaField.LORA_MODEL_NAME: {"field_name": "lora_name"},
         MetaField.LORA_MODEL_HASH: {"field_name": "lora_name", "format": calc_lora_hash},
