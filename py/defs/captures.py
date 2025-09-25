@@ -5,6 +5,9 @@ from .formatters import (
     calc_vae_hash,
     calc_lora_hash,
     calc_unet_hash,
+    get_model_name,
+    get_vae_name,
+    get_unet_name,
     convert_skip_clip,
     get_scaled_width,
     get_scaled_height,
@@ -15,7 +18,7 @@ from .formatters import (
 
 CAPTURE_FIELD_LIST = {
     "CheckpointLoaderSimple": {
-        MetaField.MODEL_NAME: {"field_name": "ckpt_name"},
+        MetaField.MODEL_NAME: {"field_name": "ckpt_name", "format": get_model_name},
         MetaField.MODEL_HASH: {"field_name": "ckpt_name", "format": calc_model_hash},
     },
     "CLIPSetLastLayer": {
@@ -25,7 +28,7 @@ CAPTURE_FIELD_LIST = {
         },
     },
     "VAELoader": {
-        MetaField.VAE_NAME: {"field_name": "vae_name"},
+        MetaField.VAE_NAME: {"field_name": "vae_name", "format": get_vae_name},
         MetaField.VAE_HASH: {"field_name": "vae_name", "format": calc_vae_hash},
     },
     "EmptyLatentImage": {
@@ -49,6 +52,39 @@ CAPTURE_FIELD_LIST = {
             "field_name": "text",
             "format": extract_embedding_hashes,
         },
+    },
+    "CLIPTextEncodeSDXL": {
+        MetaField.POSITIVE_PROMPT: {
+            "field_name": "text_g",
+            "validate": is_positive_prompt,
+        },
+        MetaField.NEGATIVE_PROMPT: {
+            "field_name": "text_g",
+            "validate": is_negative_prompt,
+        },
+        MetaField.EMBEDDING_NAME: {
+            "field_name": "text_g",
+            "format": extract_embedding_names,
+        },
+        MetaField.EMBEDDING_HASH: {
+            "field_name": "text_g",
+            "format": extract_embedding_hashes,
+        },
+    },
+    "CLIPTextEncodeFlux": {
+        MetaField.POSITIVE_PROMPT: {
+            "field_name": "t5xxl",
+            "validate": is_positive_prompt,
+        },
+        MetaField.EMBEDDING_NAME: {
+            "field_name": "t5xxl",
+            "format": extract_embedding_names,
+        },
+        MetaField.EMBEDDING_HASH: {
+            "field_name": "t5xxl",
+            "format": extract_embedding_hashes,
+        },
+        MetaField.GUIDANCE: {"field_name": "guidance"},
     },
     "KSampler": {
         MetaField.SEED: {"field_name": "seed"},
@@ -95,7 +131,7 @@ CAPTURE_FIELD_LIST = {
     },
     # Flux - https://comfyanonymous.github.io/ComfyUI_examples/flux/
     "UNETLoader": {
-        MetaField.MODEL_NAME: {"field_name": "unet_name"},
+        MetaField.MODEL_NAME: {"field_name": "unet_name", "format": get_unet_name},
         MetaField.MODEL_HASH: {"field_name": "unet_name", "format": calc_unet_hash},
     },
     "RandomNoise": {
@@ -107,5 +143,17 @@ CAPTURE_FIELD_LIST = {
     },
     "KSamplerSelect": {
         MetaField.SAMPLER_NAME: {"field_name": "sampler_name"},
+    },
+    "FluxGuidance": {
+        MetaField.GUIDANCE: {"field_name": "guidance"},
+    },
+    "CFGGuider": {
+        MetaField.CFG: {"field_name": "cfg"},
+    },
+    "AlignYourStepsScheduler": {
+        MetaField.STEPS: {"field_name": "steps"},
+    },
+    "GITSScheduler": {
+        MetaField.STEPS: {"field_name": "steps"},
     },
 }

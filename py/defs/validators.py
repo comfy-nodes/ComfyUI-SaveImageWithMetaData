@@ -23,7 +23,11 @@ def _get_node_id_list(prompt, field_name):
                 while len(d) > 0:
                     nid2 = d.popleft()
                     class_type = prompt[nid2]["class_type"]
-                    if class_type == "CLIPTextEncode":
+                    if class_type in [
+                        "CLIPTextEncode",
+                        "CLIPTextEncodeSDXL",
+                        "CLIPTextEncodeFlux"
+                    ]:
                         node_id_list[nid] = nid2
                         break
                     inputs = prompt[nid2]["inputs"]

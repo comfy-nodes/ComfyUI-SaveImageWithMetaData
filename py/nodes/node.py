@@ -49,11 +49,13 @@ class SaveImageWithMetaData(BaseNode):
             "optional": {
                 "lossless_webp": ("BOOLEAN", {"default": True}),
                 "quality": ("INT", {"default": 100, "min": 1, "max": 100}),
+                "include_workflow_metadata": ("BOOLEAN", {"default": True}),
                 "save_workflow_json": ("BOOLEAN", {"default": False}),
                 "add_counter_to_filename": ("BOOLEAN", {"default": True}),
                 "civitai_sampler": ("BOOLEAN", {"default": False}),
                 "extra_metadata": ("EXTRA_METADATA", {}),
-                "save_workflow_image": ("BOOLEAN", {"default": True}),
+                "positive_string": ("STRING", {"forceInput": True}),
+                "negative_string": ("STRING", {"forceInput": True}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -74,13 +76,15 @@ class SaveImageWithMetaData(BaseNode):
         file_format="png",
         lossless_webp=True,
         quality=100,
+        include_workflow_metadata=True,
         save_workflow_json=False,
         add_counter_to_filename=True,
         civitai_sampler=False,
         extra_metadata={},
         prompt=None,
         extra_pnginfo=None,
-        save_workflow_image=True,
+        positive_string=None,
+        negative_string=None,
     ):
         pnginfo_dict_src = self.gen_pnginfo(
             sampler_selection_method, sampler_selection_node_id, civitai_sampler
@@ -103,17 +107,20 @@ class SaveImageWithMetaData(BaseNode):
             parameters = ""
             if not args.disable_metadata:
                 metadata = PngInfo()
+                if positive_string not in (None, ""):
+                    pnginfo_dict["Positive prompt"] = positive_string.strip()
+                if negative_string not in (None, ""):
+                    pnginfo_dict["Negative prompt"] = negative_string.strip()
                 parameters = Capture.gen_parameters_str(pnginfo_dict)
                 if pnginfo_dict:
                     metadata.add_text("parameters", parameters)
-                if prompt is not None and save_workflow_image:
-                    metadata.add_text("prompt", json.dumps(prompt))
-                if extra_pnginfo is not None:
-                    for x in extra_pnginfo:
-                        metadata.add_text(x, json.dumps(extra_pnginfo[x]))
-                if save_workflow_image == False:
-                    metadata.add_text("workflow", "")
-            
+                if include_workflow_metadata == True:
+                    if prompt is not None:
+                        metadata.add_text("prompt", json.dumps(prompt))
+                    if extra_pnginfo is not None:
+                        for x in extra_pnginfo:
+                            metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+
             filename_prefix = self.format_filename(filename_prefix, pnginfo_dict)
             output_path = os.path.join(self.output_dir, filename_prefix)
             if not os.path.exists(os.path.dirname(output_path)):
@@ -265,16 +272,10 @@ class CreateExtraMetaData(BaseNode):
     def INPUT_TYPES(s):
         return {
             "required": {
-                "key1": ("STRING", {"default": "", "multiline": False}),
-                "value1": ("STRING", {"default": "", "multiline": False}),
+                "key": ("STRING", {"default": "", "multiline": False}),
+                "value": ("STRING", {"default": "", "multiline": False}),
             },
             "optional": {
-                "key2": ("STRING", {"default": "", "multiline": False}),
-                "value2": ("STRING", {"default": "", "multiline": False}),
-                "key3": ("STRING", {"default": "", "multiline": False}),
-                "value3": ("STRING", {"default": "", "multiline": False}),
-                "key4": ("STRING", {"default": "", "multiline": False}),
-                "value4": ("STRING", {"default": "", "multiline": False}),
                 "extra_metadata": ("EXTRA_METADATA",),
             },
         }
@@ -282,24 +283,15 @@ class CreateExtraMetaData(BaseNode):
     RETURN_TYPES = ("EXTRA_METADATA",)
     FUNCTION = "create_extra_metadata"
 
-    def create_extra_metadata(
-        self,
-        extra_metadata={},
-        key1="",
-        value1="",
-        key2="",
-        value2="",
-        key3="",
-        value3="",
-        key4="",
-        value4="",
-    ):
-        extra_metadata.update(
-            {
-                key1: value1,
-                key2: value2,
-                key3: value3,
-                key4: value4,
-            }
-        )
-        return (extra_metadata,)
+    def create_extra_metadata(self, key="", value="", extra_metadata=None):
+        new_metadata = {}
+
+        # If there is previous metadata, copy it
+        if isinstance(extra_metadata, dict):
+            new_metadata.update(extra_metadata)
+
+        # Adding a new value
+        if key:
+            new_metadata[key] = value
+
+        return (new_metadata,)

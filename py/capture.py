@@ -70,28 +70,62 @@ class Capture:
                                 inputs[meta].append((node_id, v))
         return inputs
 
+    # https://github.com/edelvarden/ComfyUI-ImageMetadataExtension/blob/d44f0fc298b902eb748b131d81a65449282f4ff0/py/capture.py#L73
+    @classmethod
+    def get_lora_strings_and_hashes(cls, inputs_before_sampler_node):
+        lora_names = inputs_before_sampler_node.get(MetaField.LORA_MODEL_NAME, [])
+        lora_weights = inputs_before_sampler_node.get(MetaField.LORA_STRENGTH_MODEL, [])
+        lora_hashes = inputs_before_sampler_node.get(MetaField.LORA_MODEL_HASH, [])
+
+        lora_strings = []
+        lora_hashes_string = []
+
+        for name, weight, hash in zip(lora_names, lora_weights, lora_hashes):
+            if name and weight and hash:
+                lora_name_clean = os.path.splitext(os.path.basename(name[1]))[0].replace(' ', '_')
+
+                lora_strings.append(f"<lora:{lora_name_clean}:{weight[1]}>")
+                lora_hashes_string.append(f"{lora_name_clean}: {hash[1]}")
+
+        return lora_strings, ", ".join(lora_hashes_string)
+
     @classmethod
     def gen_pnginfo_dict(cls, inputs_before_sampler_node, inputs_before_this_node, save_civitai_sampler = False):
         pnginfo_dict = {}
 
+        # https://github.com/edelvarden/ComfyUI-ImageMetadataExtension/blob/d44f0fc298b902eb748b131d81a65449282f4ff0/py/capture.py#L97
         def update_pnginfo_dict(inputs, metafield, key):
             x = inputs.get(metafield, [])
-            if len(x) > 0:
-                pnginfo_dict[key] = x[0][1]
+            if x:
+                value = x[0][1]
+                
+                if value is not None and value != "":
+                    pnginfo_dict[key] = value
+                    return value
 
-        update_pnginfo_dict(
-            inputs_before_sampler_node, MetaField.POSITIVE_PROMPT, "Positive prompt"
-        )
-        update_pnginfo_dict(
-            inputs_before_sampler_node, MetaField.NEGATIVE_PROMPT, "Negative prompt"
-        )
+            return None
+
+        positive_prompt = ""
+        positive_prompt += update_pnginfo_dict(inputs_before_sampler_node, MetaField.POSITIVE_PROMPT, "Positive prompt")
+
+        lora_strings, lora_hashes_string = cls.get_lora_strings_and_hashes(inputs_before_sampler_node)
+
+        # Append Lora models to the positive prompt, which is required
+        # for the Civitai website to parse and apply Lora weights.
+        # Format: <lora:Lora_Model_Name:weight_value>
+        # Example: <lora:Lora_Name_00:0.6> <lora:Lora_Name_01:0.8>
+        if lora_strings:
+            pnginfo_dict["lora_strings"] = lora_strings
+
+        pnginfo_dict["Positive prompt"] = positive_prompt.strip()
+        update_pnginfo_dict(inputs_before_sampler_node, MetaField.NEGATIVE_PROMPT, "Negative prompt")
 
         update_pnginfo_dict(inputs_before_sampler_node, MetaField.STEPS, "Steps")
 
         sampler_names = inputs_before_sampler_node.get(MetaField.SAMPLER_NAME, [])
         schedulers = inputs_before_sampler_node.get(MetaField.SCHEDULER, [])
 
-        if (save_civitai_sampler):
+        if save_civitai_sampler:
             pnginfo_dict["Sampler"] = cls.get_sampler_for_civitai(sampler_names, schedulers)
         else:
             if len(sampler_names) > 0:
@@ -99,10 +133,14 @@ class Capture:
 
                 if len(schedulers) > 0:
                     scheduler = schedulers[0][1]
-                    if scheduler != "normal":
-                        pnginfo_dict["Sampler"] += "_" + scheduler
+                else:
+                    scheduler = ""
+
+                if scheduler != "normal" and scheduler != "":
+                    pnginfo_dict["Sampler"] += "_" + scheduler
 
         update_pnginfo_dict(inputs_before_sampler_node, MetaField.CFG, "CFG scale")
+        update_pnginfo_dict(inputs_before_sampler_node, MetaField.GUIDANCE, "Distilled CFG Scale")
         update_pnginfo_dict(inputs_before_sampler_node, MetaField.SEED, "Seed")
 
         update_pnginfo_dict(
@@ -122,6 +160,10 @@ class Capture:
         update_pnginfo_dict(inputs_before_this_node, MetaField.VAE_NAME, "VAE")
         update_pnginfo_dict(inputs_before_this_node, MetaField.VAE_HASH, "VAE hash")
 
+        # Add Lora hashes, based on https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/82a973c04367123ae98bd9abdf80d9eda9b910e2/extensions-builtin/Lora/scripts/lora_script.py#L78
+        if lora_hashes_string:
+            pnginfo_dict["Lora hashes"] = f'"{lora_hashes_string}"'
+
         pnginfo_dict.update(cls.gen_loras(inputs_before_sampler_node))
         pnginfo_dict.update(cls.gen_embeddings(inputs_before_sampler_node))
 
@@ -133,10 +175,42 @@ class Capture:
 
         return pnginfo_dict
 
+    # https://github.com/edelvarden/ComfyUI-ImageMetadataExtension/blob/d44f0fc298b902eb748b131d81a65449282f4ff0/py/capture.py#L168
+    @classmethod
+    def extract_model_info(cls, inputs, meta_field_name, prefix):
+        model_info_dict = {}
+        model_names = inputs.get(meta_field_name, [])
+        model_hashes = inputs.get(f"{meta_field_name}_HASH", [])
+
+        for index, (model_name, model_hash) in enumerate(zip(model_names, model_hashes)):
+            field_prefix = f"{prefix}_{index}"
+            model_info_dict[f"{field_prefix} name"] = os.path.splitext(os.path.basename(model_name[1]))[0]
+            model_info_dict[f"{field_prefix} hash"] = model_hash[1]
+
+        return model_info_dict
+
+    @classmethod
+    def gen_loras(cls, inputs):
+        return cls.extract_model_info(inputs, MetaField.LORA_MODEL_NAME, "Lora")
+
+    @classmethod
+    def gen_embeddings(cls, inputs):
+        return cls.extract_model_info(inputs, MetaField.EMBEDDING_NAME, "Embedding")
+
     @classmethod
     def gen_parameters_str(cls, pnginfo_dict):
-        result = pnginfo_dict.get("Positive prompt", "") + "\n"
-        result += "Negative prompt: " + pnginfo_dict.get("Negative prompt", "") + "\n"
+        result = pnginfo_dict.get("Positive prompt", "")
+
+        lora_strings = pnginfo_dict.get("lora_strings", "")
+        if lora_strings:
+            result += " " + " ".join(lora_strings)
+            del pnginfo_dict["lora_strings"]
+
+        result += "\n"
+
+        negative_prompt = pnginfo_dict.get("Negative prompt", "")
+        if negative_prompt:
+            result += "Negative prompt: " + negative_prompt + "\n"
 
         s_list = []
         pnginfo_dict_without_prompt = {
@@ -182,44 +256,6 @@ class Capture:
         return resource_hashes
 
     @classmethod
-    def gen_loras(cls, inputs):
-        pnginfo_dict = {}
-
-        model_names = inputs.get(MetaField.LORA_MODEL_NAME, [])
-        model_hashes = inputs.get(MetaField.LORA_MODEL_HASH, [])
-        strength_models = inputs.get(MetaField.LORA_STRENGTH_MODEL, [])
-        strength_clips = inputs.get(MetaField.LORA_STRENGTH_CLIP, [])
-
-        index = 0
-        for model_name, model_hashe, strength_model, strength_clip in zip(
-            model_names, model_hashes, strength_models, strength_clips
-        ):
-            field_prefix = f"Lora_{index}"
-            pnginfo_dict[f"{field_prefix} Model name"] = os.path.basename(model_name[1])
-            pnginfo_dict[f"{field_prefix} Model hash"] = model_hashe[1]
-            pnginfo_dict[f"{field_prefix} Strength model"] = strength_model[1]
-            pnginfo_dict[f"{field_prefix} Strength clip"] = strength_clip[1]
-            index += 1
-
-        return pnginfo_dict
-
-    @classmethod
-    def gen_embeddings(cls, inputs):
-        pnginfo_dict = {}
-
-        embedding_names = inputs.get(MetaField.EMBEDDING_NAME, [])
-        embedding_hashes = inputs.get(MetaField.EMBEDDING_HASH, [])
-
-        index = 0
-        for embedding_name, embedding_hashe in zip(embedding_names, embedding_hashes):
-            field_prefix = f"Embedding_{index}"
-            pnginfo_dict[f"{field_prefix} name"] = os.path.basename(embedding_name[1])
-            pnginfo_dict[f"{field_prefix} hash"] = embedding_hashe[1]
-            index += 1
-
-        return pnginfo_dict
-    
-    @classmethod
     def get_sampler_for_civitai(cls, sampler_names, schedulers):
         """
         Get the pretty sampler name for Civitai in the form of `<Sampler Name> <Scheduler name>`.
@@ -250,10 +286,14 @@ class Capture:
                 return sampler + " Karras"
             return sampler
 
-        if len(sampler_names) > 0:
-            sampler = sampler_names[0][1]
+        if len(sampler_names) == 0:
+            return ""
+
+        sampler = sampler_names[0][1]
         if len(schedulers) > 0:
             scheduler = schedulers[0][1]
+        else:
+            scheduler = ""
 
         match sampler:
             case "euler" | "euler_cfg_pp":
@@ -289,6 +329,6 @@ class Capture:
             case "uni_pc" | "uni_pc_bh2":
                 return "UniPC"
             
-        if scheduler == "normal":
+        if scheduler in ("normal", ""):
             return sampler
         return sampler + "_" + scheduler

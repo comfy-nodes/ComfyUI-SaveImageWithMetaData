@@ -7,10 +7,14 @@
 - Since the values are extracted dynamically, values output by various extension nodes can be added to metadata.
 
 ## Installation
+Using CLI, go to the ComfyUI folder
 ```
-cd <ComfyUI directory>/custom_nodes
-git clone https://github.com/nkchocoai/ComfyUI-SaveImageWithMetaData.git
+cd custom_nodes
 ```
+```
+git clone https://github.com/comfy-nodes/ComfyUI-SaveImageWithMetaData.git
+```
+Restart ComfyUI
 
 ## Nodes
 ### Save Image With Metadata
