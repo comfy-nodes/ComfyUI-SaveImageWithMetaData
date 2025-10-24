@@ -86,6 +86,42 @@ CAPTURE_FIELD_LIST = {
         },
         MetaField.GUIDANCE: {"field_name": "guidance"},
     },
+    "TextEncodeQwenImageEdit": {
+        MetaField.POSITIVE_PROMPT: {
+            "field_name": "prompt",
+            "validate": is_positive_prompt,
+        },
+        MetaField.NEGATIVE_PROMPT: {
+            "field_name": "prompt",
+            "validate": is_negative_prompt,
+        },
+        MetaField.EMBEDDING_NAME: {
+            "field_name": "prompt",
+            "format": extract_embedding_names,
+        },
+        MetaField.EMBEDDING_HASH: {
+            "field_name": "prompt",
+            "format": extract_embedding_hashes,
+        },
+    },
+    "TextEncodeQwenImageEditPlus": {
+        MetaField.POSITIVE_PROMPT: {
+            "field_name": "prompt",
+            "validate": is_positive_prompt,
+        },
+        MetaField.NEGATIVE_PROMPT: {
+            "field_name": "prompt",
+            "validate": is_negative_prompt,
+        },
+        MetaField.EMBEDDING_NAME: {
+            "field_name": "prompt",
+            "format": extract_embedding_names,
+        },
+        MetaField.EMBEDDING_HASH: {
+            "field_name": "prompt",
+            "format": extract_embedding_hashes,
+        },
+    },
     "KSampler": {
         MetaField.SEED: {"field_name": "seed"},
         MetaField.STEPS: {"field_name": "steps"},
