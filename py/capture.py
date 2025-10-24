@@ -105,8 +105,7 @@ class Capture:
 
             return None
 
-        positive_prompt = ""
-        positive_prompt += update_pnginfo_dict(inputs_before_sampler_node, MetaField.POSITIVE_PROMPT, "Positive prompt")
+        positive_prompt = update_pnginfo_dict(inputs_before_sampler_node, MetaField.POSITIVE_PROMPT, "Positive prompt") or ""
 
         lora_strings, lora_hashes_string = cls.get_lora_strings_and_hashes(inputs_before_sampler_node)
 
