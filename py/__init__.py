@@ -49,3 +49,21 @@ if not hasattr(LRUCache, "get_output_cache"):
     LRUCache.get_output_cache = _cache_get_output_cache
 if not hasattr(NullCache, "get_output_cache"):
     NullCache.get_output_cache = _nullcache_get_output_cache
+
+
+def _cache_get_cache(self, input_unique_id, unique_id):
+    # unique_id is ignored here; we only need cached outputs of input_unique_id
+    try:
+        return self.get(input_unique_id)
+    except Exception:
+        return None
+
+def _nullcache_get_cache(self, input_unique_id, unique_id):
+    return None
+
+if not hasattr(HierarchicalCache, "get_cache"):
+    HierarchicalCache.get_cache = _cache_get_cache
+if not hasattr(LRUCache, "get_cache"):
+    LRUCache.get_cache = _cache_get_cache
+if not hasattr(NullCache, "get_cache"):
+    NullCache.get_cache = _nullcache_get_cache
