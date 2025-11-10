@@ -45,5 +45,9 @@ CAPTURE_FIELD_LIST = {
         MetaField.IMAGE_WIDTH: {"field_name": "aspect_ratio", "format": get_width},
         MetaField.IMAGE_HEIGHT: {"field_name": "aspect_ratio", "format": get_height},
     },
+    "ComfierEmptyLatent": {
+        MetaField.IMAGE_WIDTH: {"field_name": "size", "format": get_width},
+        MetaField.IMAGE_HEIGHT: {"field_name": "size", "format": get_height},
+    },
     # TODO RandomEmptyLatentImageFromPresetsSD..
 }
