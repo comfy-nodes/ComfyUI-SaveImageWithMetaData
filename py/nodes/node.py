@@ -65,6 +65,36 @@ class SaveImageWithMetaData(BaseNode):
 
     OUTPUT_NODE = True
 
+    DESCRIPTION = """
+## filename_prefix
+The string (Key) specified in `filename_prefix` will be replaced with the retrieved information.
+
+| Key               | Information to be replaced            |
+| ----------------- | ------------------------------------- |
+| `%seed%`          | Seed value                            |
+| `%width%`         | Image width                           |
+| `%height%`        | Image height                          |
+| `%pprompt%`       | Positive prompt                       |
+| `%pprompt:[n]%`   | First n characters of Positive prompt |
+| `%nprompt%`       | Negative prompt                       |
+| `%nprompt:[n]%`   | First n characters of Negative prompt |
+| `%model%`         | Checkpoint name                       |
+| `%model:[n]%`     | First n characters of Checkpoint name |
+| `%date%`          | Date of generation (yyyyMMddhhmmss)   |
+| `%date:[format]%` | Date of generation                    |
+
+- See the following table for the identifier specified by `[format]` in `%date:[format]%`.
+
+| Identifier | Description |
+| ---------- | ----------- |
+| `yyyy`     | Year        |
+| `MM`       | Month       |
+| `dd`       | Day         |
+| `hh`       | Hour        |
+| `mm`       | Minute      |
+| `ss`       | Second      |
+"""
+
     pattern_format = re.compile(r"(%[^%]+%)")
 
     def save_images(
