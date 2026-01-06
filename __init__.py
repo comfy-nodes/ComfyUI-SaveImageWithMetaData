@@ -1,5 +1,7 @@
 from .py.nodes.node import SaveImageWithMetaData, CreateExtraMetaData
 
+WEB_DIRECTORY = "./web"
+
 NODE_CLASS_MAPPINGS = {
     "SaveImageWithMetaData": SaveImageWithMetaData,
     "CreateExtraMetaData": CreateExtraMetaData,
