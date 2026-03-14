@@ -35,8 +35,9 @@ from comfy_execution.caching import HierarchicalCache, LRUCache, NullCache
 
 def _cache_get_output_cache(self, input_unique_id, unique_id):
     # unique_id is ignored here; we only need cached outputs of input_unique_id
+    # Use get_local (sync) instead of get (async) to avoid returning a coroutine
     try:
-        return self.get(input_unique_id)
+        return self.get_local(input_unique_id)
     except Exception:
         return None
 
@@ -53,8 +54,9 @@ if not hasattr(NullCache, "get_output_cache"):
 
 def _cache_get_cache(self, input_unique_id, unique_id):
     # unique_id is ignored here; we only need cached outputs of input_unique_id
+    # Use get_local (sync) instead of get (async) to avoid returning a coroutine
     try:
-        return self.get(input_unique_id)
+        return self.get_local(input_unique_id)
     except Exception:
         return None
 
